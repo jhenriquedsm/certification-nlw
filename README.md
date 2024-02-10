@@ -37,3 +37,5 @@ Os tipos de parâmetros
 ORM -> Object Relational Mapper
 
 Repositório (Repository) -> Interagir com o banco de dados
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-jhenriquedsm-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/jhenriquedsm/)
