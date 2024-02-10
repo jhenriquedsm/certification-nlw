@@ -32,21 +32,31 @@ public class StudentCertificationAnswersUseCase {
         // buscar as alternativas das perguntas
         // - correct or incorrect
         List<QuestionEntity> questionsEntity = questionRepository.findByTechnology(dto.getTechnology());
+        List<AnswersCertificationsEntity> answersCertifications = new ArrayList<>();
+
         dto.getQuestionAnswers()
-        .stream().forEach(questionAnswer -> {
-            var question = questionsEntity.stream()
-                .filter(q -> q.getId().equals(questionAnswer.getQuestion_id()))
-                .findFirst().get();
+            .stream().forEach(questionAnswer -> {
+                var question = questionsEntity.stream()
+                    .filter(q -> q.getId().equals(questionAnswer.getQuestion_id()))
+                    .findFirst().get();
 
-            var findCorrectAlternative = question.getAlternatives().stream()
-                .filter(alternative -> alternative.isCorrect())
-                .findFirst().get();
+                var findCorrectAlternative = question.getAlternatives().stream()
+                    .filter(alternative -> alternative.isCorrect())
+                    .findFirst().get();
 
-            if(findCorrectAlternative.getId().equals(questionAnswer.getAlternative_id())) {
-                questionAnswer.setCorrect(true);
-            } else {
-                questionAnswer.setCorrect(false);
-            }
+                if(findCorrectAlternative.getId().equals(questionAnswer.getAlternative_id())) {
+                    questionAnswer.setCorrect(true);
+                } else {
+                    questionAnswer.setCorrect(false);
+                }
+                
+                var answersCertificationsEntities = AnswersCertificationsEntity.builder()
+                    .answer_id(questionAnswer.getAlternative_id())
+                    .question_id(questionAnswer.getQuestion_id())
+                    .isCorrect(questionAnswer.isCorrect())
+                    .build();
+
+                answersCertifications.add(answersCertificationsEntities);
         });
 
         // Verificar se existe student
@@ -59,16 +69,22 @@ public class StudentCertificationAnswersUseCase {
         } else {
             student_id = student.get().getId();
         }
-        
-        List<AnswersCertificationsEntity> answersCertifications = new ArrayList<>();
 
         CertificationsStudentEntity certificationsStudentEntity = CertificationsStudentEntity.builder()
             .technology(dto.getTechnology())
             .student_id(student_id)
-            .answersCertificationsEntities(answersCertifications)
             .build();
 
             var certificationStudentCreated = certificationStudentRepository.save(certificationsStudentEntity);
+
+            answersCertifications.stream().forEach(answerCerotification -> {
+                answerCerotification.setCertification_id(certificationsStudentEntity.getId());
+                answerCerotification.setCertificationsStudentEntity(certificationsStudentEntity);
+            });
+
+            certificationsStudentEntity.setAnswersCertificationsEntities(answersCertifications);
+
+            certificationStudentRepository.save(certificationsStudentEntity);
 
         return certificationStudentCreated;
         // salvar informações da certificação
