@@ -39,7 +39,7 @@ public class CertificationsStudentEntity {
     @Column(length = 10)
     private int grade;
 
-    @JoinColumn(name = "student_id")
+    @Column(name = "student_id")
     private UUID student_id;
 
     @ManyToOne
